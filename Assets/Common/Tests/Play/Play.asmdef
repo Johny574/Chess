@@ -1,0 +1,6 @@
+{
+    "name": "Play",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
