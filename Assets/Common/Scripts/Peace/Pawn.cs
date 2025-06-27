@@ -14,6 +14,11 @@ public class Pawn : Peace
             Board.Instance.GetSquare(Square.Origin, new int[2]{ direction , 0 } ),
         };
 
+        if (availableSquares[0].Occupant != null)
+        {
+            availableSquares.RemoveAt(0);
+        }
+        
         List<Square> takesquares = new()
         {
             Board.Instance.GetSquare(Square.Origin, new int[2]{ direction , -1 } ),
