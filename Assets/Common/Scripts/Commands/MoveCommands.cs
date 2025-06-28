@@ -6,45 +6,47 @@ namespace MoveCommands
     public class MoveCommand : ICommand
     {
         private Peace peace;
-        private Square from;
-        private Square to;
+        public Square From;
+        public Square To;
         private Player player;
 
         public MoveCommand(Peace peace, Square from, Square to, Player player)
         {
             this.peace = peace;
-            this.to = to;
-            this.from = from;
+            this.To = to;
+            this.From = from;
             this.player = player;
         }
 
         public void Excecute()
         {
-            //  setup
-            if (from != null)
+            //  setup peaces
+            if (From == null)
+            {
+                peace.Move(To, true);
+            }
+            else
             {
                 peace.Square.Occupant = null;
                 peace.Deselect();
 
-                if (peace.GetType() == typeof(Pawn))
-                {
-                    ((Pawn)peace).startingPosition = false;
-                }
+                // // if (peace.GetType() == typeof(Pawn))
+                // // {
+                // //     ((Pawn)peace).startingPosition = false;
+                // }
+                GameEvents.Instance.PeaceMoved?.Invoke(From, To);
+                peace.Move(To, false);
+                player.Selected = null;
+                player.Moves.Enqueue(this);
+                GameManager.Instance.ChangeTurn();
             }
-
-            peace.Square = to;
-            peace.Square.Occupant = peace;
-            peace.transform.position = peace.Square.transform.position;
     
-            player.Selected = null;
-            player.Moves.Enqueue(this);
-            GameManager.Instance.ChangeTurn();
         }
 
         public void Undo()
         {
-            from.Occupant = peace;
-            peace.Square = from;
+            From.Occupant = peace;
+            peace.Square = From;
             peace.transform.position = peace.Square.transform.position;
             player.Selected = null;
         }
@@ -68,7 +70,7 @@ namespace MoveCommands
         public void Excecute()
         {
             GameObject.Destroy(to.Occupant.gameObject);
-            GameManager.Instance.Players[to.Occupant._Color].Peaces.Remove(to.Occupant);
+            GameManager.Instance.CurrentOpponent().Peaces.Remove(to.Occupant);
             to.Occupant = null;
             new MoveCommand(peace, from, to, player).Excecute();
         }

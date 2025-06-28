@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class Queen : Peace
 {
@@ -10,6 +9,7 @@ public class Queen : Peace
 
         int[] directions = { -1, +1 };
 
+        // diagonal
         foreach (var dirx in directions)
         {
             foreach (var diry in directions)
@@ -35,7 +35,7 @@ public class Queen : Peace
                 }       
             }
         }
-
+        // horizontal
         foreach (var dirx in directions)
         {
             foreach (var diry in directions)
@@ -61,15 +61,16 @@ public class Queen : Peace
                 }       
             }
         }
+        // vertical
         foreach (var dirx in directions)
         {
             foreach (var diry in directions)
             {
                 for (int i = 1; i < Board.Instance.Width; i++)
                 {
-    
-                    var target = Board.Instance.GetSquare(Square.Origin, new int[2] { 0, diry * i});
-                     
+
+                    var target = Board.Instance.GetSquare(Square.Origin, new int[2] { 0, diry * i });
+
                     if (target == null)
                     {
                         break;
@@ -84,7 +85,7 @@ public class Queen : Peace
                         break;
                     }
                     availableSquares.Add(target);
-                }       
+                }
             }
         }
 

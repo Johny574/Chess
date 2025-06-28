@@ -9,12 +9,15 @@ using UnityEngine;
 
 [Serializable]
 public abstract class Peace : MonoBehaviour
-{    
+{
     [field: SerializeField] public Square Square;
     public List<Square> LegalMoves;
-    public Player.Color _Color;
+    public int _Color;
+    public bool StartingPosition = true;
     public abstract List<Square> GetLegalSquares();
-    public void Select()
+ 
+    // i dont like this virtual but the king will need it to light castle squares
+    public virtual void Select()
     {
         foreach (var item in LegalMoves)
         {
@@ -25,14 +28,14 @@ public abstract class Peace : MonoBehaviour
         }
     }
 
-    public void Deselect()
+    public virtual void Deselect()
     {
         
         if (Square == null)
         {
-            return;       
+            return;
         }
-        
+
         foreach (var item in LegalMoves)
         {
             if (item != null)
@@ -40,5 +43,13 @@ public abstract class Peace : MonoBehaviour
                 item.gameObject.GetComponent<SpriteRenderer>().color = item.DefaultColor;
             }
         }
+    }
+
+    public void Move(Square to, bool startingPosition)
+    {
+        StartingPosition = startingPosition;
+        Square = to;
+        Square.Occupant = this;
+        transform.position = Square.transform.position;
     }
 }

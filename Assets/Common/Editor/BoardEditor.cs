@@ -13,5 +13,9 @@ public class BoardEditor : Editor
         {
             ((Board)target).Create();
         }
+        if (GUILayout.Button("Clear"))
+        {
+            ((Board)target).Clear();
+        }
     }
 }

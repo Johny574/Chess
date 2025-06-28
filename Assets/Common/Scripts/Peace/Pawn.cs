@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class Pawn : Peace
 {
     public int direction = -1;
-    public bool startingPosition = true;
 
     public override List<Square> GetLegalSquares()
     {
@@ -14,9 +12,14 @@ public class Pawn : Peace
             Board.Instance.GetSquare(Square.Origin, new int[2]{ direction , 0 } ),
         };
 
+        if (StartingPosition)
+        {
+            availableSquares.Add(Board.Instance.GetSquare(Square.Origin, new int[2] { direction + direction , 0 }));
+        }
+       
         if (availableSquares[0].Occupant != null)
         {
-            availableSquares.RemoveAt(0);
+            availableSquares.Clear();
         }
         
         List<Square> takesquares = new()
@@ -25,11 +28,6 @@ public class Pawn : Peace
             Board.Instance.GetSquare(Square.Origin, new int[2]{ direction , +1 } ),
         };
 
-        if (startingPosition)
-        {
-            availableSquares.Add(Board.Instance.GetSquare(Square.Origin, new int[2] { direction + direction , 0 }));
-        }
-       
         for (int i = 0; i < takesquares.Count; i++)
         {
             if (takesquares[i] != null)

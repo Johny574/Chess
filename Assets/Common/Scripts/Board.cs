@@ -1,7 +1,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using TMPro;
 using UnityEngine;
 
 public class Board : MonoBehaviour
@@ -10,9 +10,25 @@ public class Board : MonoBehaviour
     [SerializeField] private List<Column> _board = new();
     [SerializeField] private GameObject _whiteSquare, _darkSquare;
     public int Width = 8, Height = 8;
+    [SerializeField] private GameObject _tag;
+    [SerializeField] private Canvas _canvas;
     void Awake()
     {
         if (Instance == null) { Instance = this; }
+    }
+
+    public void Clear()
+    {
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            DestroyImmediate(transform.GetChild(0).gameObject);
+        }
+        
+        for (int i = 0; i < _canvas.transform.childCount; i++)
+        {
+            DestroyImmediate(_canvas.transform.GetChild(0).gameObject);   
+        }
+
     }
 
     public void Create()
@@ -21,15 +37,34 @@ public class Board : MonoBehaviour
         for (int x = 0; x < Width; x++)
         {
             _board.Add(new Column());
+            var tag = GameObject.Instantiate(_tag);
+
+            tag.transform.position = new Vector2(-1, 1f * x);
+            tag.gameObject.SetActive(true);
+            tag.transform.SetParent(_canvas.transform);
+            tag.GetComponent<TextMeshProUGUI>().text = (x + 1).ToString();
+
             for (int y = 0; y < Height; y++)
             {
                 var variant = (x + y) % 2 == 0 ? _whiteSquare : _darkSquare;
                 Square newSquare = Instantiate(variant).GetComponent<Square>();
+
+                newSquare.transform.SetParent(transform);
+                tag.transform.SetParent(_canvas.transform);
                 newSquare.Origin[0] = x;
                 newSquare.Origin[1] = y;
                 _board[x].Rows[y] = newSquare;
                 newSquare.transform.position = new Vector2(1f * y, 1f * x);
             }
+        }
+
+        for (int y = 0; y < Height; y++)
+        {
+            var tag = GameObject.Instantiate(_tag);
+            tag.transform.position = new Vector2(1f * y, -1);
+            tag.gameObject.SetActive(true);
+            tag.transform.SetParent(_canvas.transform);
+            tag.GetComponent<TextMeshProUGUI>().text = ((char)(y + 65)).ToString();
         }
     }
 
@@ -44,6 +79,24 @@ public class Board : MonoBehaviour
         }
 
         return _board[newX].Rows[newY];
+    }
+
+    public Tuple<Square, Square> ParseMove(string move)
+    {
+        int[] from = new int[2]
+        {
+            move[1] - '0' - 1,
+            move[0] - 'a'
+        };
+
+        int[] to = new int[2]
+        {
+            move[3] - '0' - 1,
+            move[2] - 'a'
+        };
+        Square fromSquare = GetSquare(from, new int[2] { 0, 0 });
+        Square toSquare = GetSquare(to, new int[2] { 0, 0 });
+        return Tuple.Create(fromSquare, toSquare);
     }
 
     public bool InCheck(Player player, Player opponent, Peace occupant)
@@ -68,7 +121,7 @@ public class Board : MonoBehaviour
     public void SetLegalSquares(Peace peace, Player player, Player opponent)
     {
         List<Square> moves = peace.GetLegalSquares();
-        List<Square> validmoves = new();
+        List<Square> legalmoves = new();
 
         for (int i = 0; i < moves.Count; i++)
         {
@@ -83,7 +136,7 @@ public class Board : MonoBehaviour
             {
                 if (!player.Peaces.Contains(occupant))
                 {
-                    validmoves.Add(moves[i]);
+                    legalmoves.Add(moves[i]);
                 }
             }
 
@@ -92,7 +145,7 @@ public class Board : MonoBehaviour
             moves[i].Occupant = occupant;
         }
 
-        peace.LegalMoves = validmoves;
+        peace.LegalMoves = legalmoves;
     }
 
     public bool Checkmate(Player player, Player opponent)
@@ -139,17 +192,6 @@ public class Board : MonoBehaviour
         });
 
         return kingMoves.Count == 0;
-    }
-
-    public void Refresh()
-    {
-        foreach (var square in _board.SelectMany(x => x.Rows))
-        {
-            if (square.Occupant)
-            {
-                square.Occupant.LegalMoves = square.Occupant.GetLegalSquares();           
-            }   
-        }
     }
 }
 

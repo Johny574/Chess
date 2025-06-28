@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 public class Bishop : Peace
 {
-
     public override List<Square> GetLegalSquares()
     {
         List<Square> availableSquares = new();
